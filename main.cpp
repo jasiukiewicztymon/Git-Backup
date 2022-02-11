@@ -14,36 +14,94 @@ int main() {
     std::string str, path;
     std::vector<std::string> repo;
     struct stat buffer;
+    char ch;
+
+    char chsave;
+    std::string profilname, content = "", profilpath = ".\\profil\\", line;
+
+    std::cout << "[0] - New Backup\n[1] - Backup from profil\n[2] - Exit\n\n";
 
     do {
-        std::cout << "Give the backup path: ";
-        std::getline(std::cin, path); 
-    } while (stat(path.c_str(), &buffer) != 0);
+        std::cin >> ch;
+    } while (ch != '0' && ch != '1' && ch != '2');
 
-    if (path[path.size() - 1] == '\\') {
-        system(("mkdir " + path + "backup\\").c_str());
-        path += "backup\\";
-    }    
-    else {
-        system(("mkdir " + path + "\\backup\\").c_str());
-        path += "\\backup\\";
-    }  
+    std::cout << "\n\n";
 
-    std::cout << "\n";
+    switch (ch) {
+        case '0':
+            do {
+                std::cout << "Give the backup path: ";
+                std::getline(std::cin, path);
+            } while (stat(path.c_str(), &buffer) != 0 && path != "exit");
 
-    while (1) {
-        std::cout << "Give the git repo link: ";
-        std::getline(std::cin, str);
-        if (str.rfind("https://", 0) == 0 || str.rfind("http://", 0) == 0) {
-            repo.emplace_back(str);
-        }
-        else { break; }
+            if (stat(path.c_str(), &buffer) == 0) {
+                if (path[path.size() - 1] == '\\') {
+                    system(("mkdir " + path + "backup\\").c_str());
+                    path += "backup\\";
+                }
+                else {
+                    system(("mkdir " + path + "\\backup\\").c_str());
+                    path += "\\backup\\";
+                }
+            }
+
+            std::cout << "\n";
+
+            while (1) {
+                std::cout << "Give the git repo link: ";
+                std::getline(std::cin, str);
+                if (str.rfind("https://", 0) == 0 || str.rfind("http://", 0) == 0) {
+                    repo.emplace_back(str);
+                }
+                else { break; }
+            }
+
+            std::cout << "\n";
+
+            for (int i = 0; i < repo.size(); i++) {
+                system(("git clone " + repo[i] + " " + path).c_str());
+                std::cout << "\n";
+            }
+            
+            std::cout << "\n\n";
+
+            std::cout << "Do you want to save the profil? [y/n] ";
+            
+            std::cin >> chsave;
+
+            if (chsave == 'y') {
+                std::cout << "\nGive the profil name: ";
+                std::getline(std::cin, profilname);
+
+                for (int i = 0; i < repo.size(); i++) {
+                    content += "git clone " + repo[i] + " " + path + "\n";
+                }
+                
+                if (stat(profilpath.c_str(), &buffer) != 0)
+                    system(("mkdir " + profilpath).c_str());
+
+                std::ofstream outfile(".\\profil\\" + profilname);
+                outfile << content;
+                outfile.close();
+            }
+            break;
+        case '1':
+            do {
+                std::cout << "\nGive the profil name: ";
+                std::getline(std::cin, profilname);
+            } while (stat(profilpath.c_str(), &buffer) != 0 && profilpath != "exit");
+            
+            if (stat(profilpath.c_str(), &buffer) == 0) {
+                std::ifstream infile(".\\profil\\" + profilname);
+
+                while (infile >> line) {
+                    system(line.c_str());
+                }
+
+                infile.close();
+            }
+            break;
     }
 
-    std::cout << "\n";
-
-    for (int i = 0; i < repo.size(); i++) {
-        system(("git clone " + repo[i] + " " + path).c_str());
-        std::cout << "\n";
-    }
+    system("cls");
 }
