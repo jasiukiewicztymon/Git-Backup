@@ -2,7 +2,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <sys/stat.h>
+#include <stdio.h>
+#include <time.h>
 
 int main() {
     std::cout << "   ____    __              _______________  __            __           \n"
@@ -73,6 +74,17 @@ int main() {
                 std::cout << "\nGive the profil name: ";
                 std::getline(std::cin, profilname);
 
+                time_t     now = time(0);
+                struct tm  tstruct;
+                char       buf[80];
+                tstruct = *localtime(&now);
+                strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+                for (int i = 0; i < 10; i++) {
+                    content += buf[i];
+                }
+                content += "\n";
+
                 for (int i = 0; i < repo.size(); i++) {
                     content += "git clone " + repo[i] + " " + path + "\n";
                 }
@@ -94,6 +106,7 @@ int main() {
             if (stat(profilpath.c_str(), &buffer) == 0) {
                 std::ifstream infile(".\\profil\\" + profilname);
 
+                infile >> line;
                 while (infile >> line) {
                     system(line.c_str());
                 }
