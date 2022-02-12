@@ -2,8 +2,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <stdio.h>
-#include <time.h>
+#include <chrono>
+#include <ctime>    
 
 int main() {
     std::cout << "   ____    __              _______________  __            __           \n"
@@ -29,91 +29,88 @@ int main() {
     std::cout << "\n\n";
 
     switch (ch) {
-        case '0':
-            do {
-                std::cout << "Give the backup path: ";
-                std::getline(std::cin, path);
-            } while (stat(path.c_str(), &buffer) != 0 && path != "exit");
+    case '0':
+        do {
+            std::cout << "Give the backup path: ";
+            std::getline(std::cin, path);
+        } while (stat(path.c_str(), &buffer) != 0 && path != "exit");
 
-            if (stat(path.c_str(), &buffer) == 0) {
-                if (path[path.size() - 1] == '\\') {
-                    system(("mkdir " + path + "backup\\").c_str());
-                    path += "backup\\";
-                }
-                else {
-                    system(("mkdir " + path + "\\backup\\").c_str());
-                    path += "\\backup\\";
-                }
+        if (stat(path.c_str(), &buffer) == 0) {
+            if (path[path.size() - 1] == '\\') {
+                system(("mkdir " + path + "backup\\").c_str());
+                path += "backup\\";
             }
-
-            std::cout << "\n";
-
-            while (1) {
-                std::cout << "Give the git repo link: ";
-                std::getline(std::cin, str);
-                if (str.rfind("https://", 0) == 0 || str.rfind("http://", 0) == 0) {
-                    repo.emplace_back(str);
-                }
-                else { break; }
+            else {
+                system(("mkdir " + path + "\\backup\\").c_str());
+                path += "\\backup\\";
             }
+        }
 
+        std::cout << "\n";
+
+        while (1) {
+            std::cout << "Give the git repo link: ";
+            std::getline(std::cin, str);
+            if (str.rfind("https://", 0) == 0 || str.rfind("http://", 0) == 0) {
+                repo.emplace_back(str);
+            }
+            else { break; }
+        }
+
+        std::cout << "\n";
+
+        for (int i = 0; i < repo.size(); i++) {
+            system(("git clone " + repo[i] + " " + path).c_str());
             std::cout << "\n";
+        }
+
+        std::cout << "\n\n";
+
+        std::cout << "Do you want to save the profil? [y/n] ";
+
+        std::cin >> chsave;
+
+        if (chsave == 'y') {
+            std::cout << "\nGive the profil name: ";
+            std::getline(std::cin, profilname);
+
+            auto start = std::chrono::system_clock::now();
+            auto end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end - start;
+            std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+            content += std::ctime(&end_time);
+            content += "\n";
 
             for (int i = 0; i < repo.size(); i++) {
-                system(("git clone " + repo[i] + " " + path).c_str());
-                std::cout << "\n";
+                content += "git clone " + repo[i] + " " + path + "\n";
             }
-            
-            std::cout << "\n\n";
 
-            std::cout << "Do you want to save the profil? [y/n] ";
-            
-            std::cin >> chsave;
+            if (stat(profilpath.c_str(), &buffer) != 0)
+                system(("mkdir " + profilpath).c_str());
 
-            if (chsave == 'y') {
-                std::cout << "\nGive the profil name: ";
-                std::getline(std::cin, profilname);
+            std::ofstream outfile(".\\profil\\" + profilname);
+            outfile << content;
+            outfile.close();
+        }
+        break;
+    case '1':
+        do {
+            std::cout << "\nGive the profil name: ";
+            std::getline(std::cin, profilname);
+        } while (stat(profilpath.c_str(), &buffer) != 0 && profilpath != "exit");
 
-                time_t     now = time(0);
-                struct tm  tstruct;
-                char       buf[80];
-                tstruct = *localtime(&now);
-                strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+        if (stat(profilpath.c_str(), &buffer) == 0) {
+            std::ifstream infile(".\\profil\\" + profilname);
 
-                for (int i = 0; i < 10; i++) {
-                    content += buf[i];
-                }
-                content += "\n";
-
-                for (int i = 0; i < repo.size(); i++) {
-                    content += "git clone " + repo[i] + " " + path + "\n";
-                }
-                
-                if (stat(profilpath.c_str(), &buffer) != 0)
-                    system(("mkdir " + profilpath).c_str());
-
-                std::ofstream outfile(".\\profil\\" + profilname);
-                outfile << content;
-                outfile.close();
+            infile >> line;
+            while (infile >> line) {
+                system(line.c_str());
             }
-            break;
-        case '1':
-            do {
-                std::cout << "\nGive the profil name: ";
-                std::getline(std::cin, profilname);
-            } while (stat(profilpath.c_str(), &buffer) != 0 && profilpath != "exit");
-            
-            if (stat(profilpath.c_str(), &buffer) == 0) {
-                std::ifstream infile(".\\profil\\" + profilname);
 
-                infile >> line;
-                while (infile >> line) {
-                    system(line.c_str());
-                }
-
-                infile.close();
-            }
-            break;
+            infile.close();
+        }
+        break;
     }
 
     system("cls");
