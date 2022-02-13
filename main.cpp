@@ -78,6 +78,9 @@ int main() {
         system("mkdir .\\Scripts\\");
     }
 
+    struct dirent* d;
+    int pathtodel;
+
     std::string n;
     std::vector<std::string> Dir;
 
@@ -104,6 +107,9 @@ int main() {
     std::string path0, repo0, filename0 = "";
     std::vector<std::string> Path0;
 
+    std::string path1, repo1;
+    std::vector<std::string> Repo1;
+
     do {
         // version name
         std::time_t rawtime;
@@ -114,12 +120,11 @@ int main() {
         timeinfo = std::localtime(&rawtime);
 
         std::strftime(buffer2, 80, "%Y-%m-%d", timeinfo);
-        std::puts(buffer2);
 
         std::string date = buffer2;
 
         // get option
-        std::cout << "[0] - Upload from local a backup\n[1] - Download to local a backup\n[2] - Manage backups\n[3] - Exit\n\n";
+        std::cout << "[0] - Upload from local a backup\n[1] - Download to local a backup\n[2] - Delete backups\n[3] - Exit\n\n";
         do {
             std::cout << "> ";
             std::cin >> choice;
@@ -170,10 +175,12 @@ int main() {
                 }
 
                 for (int i = 0; i < Path0.size(); i++)
-                    system(("copy /Z \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
+                    system(("copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
 
                 fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
                 fw << "@echo off\n";
+                for (int i = 0; i < Path0.size(); i++)
+                    fw << "copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\\n";
                 fw << "git.exe init\n";
                 fw << "git.exe add --all\n";
                 fw << "git.exe commit -m " + date + "\n";
@@ -192,8 +199,74 @@ int main() {
                 Path0.clear();
                 break;
             case 1:
+                // select a repository
+                do {
+                    std::cout << "Give the repository url: ";
+                    std::cin >> repo1;
+                    if (repo1.size() < 5)
+                        break;
+                    else if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
+                        Repo1.emplace_back(repo1);
+                } while (1);
+
+                std::cout << "\n";
+
+                /*
+                Config file:
+
+                date ~ [date]
+                repo ~ [link]
+                file ~ [dir]
+                */
+
+                std::cout << "\nName the bat file: ";
+                std::cin >> outname;
+                n = ".\\Scripts\\" + outname + "\\";
+
+                if (stat(n.c_str(), &buffer) != 0) {
+                    system(("mkdir " + n).c_str());
+                }
+
+                fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
+                fw << "@echo off\n";
+                fw << "cd " << n << "\n";
+                for (int i = 0; i < Repo1.size(); i++) {
+                    system(("mkdir " + date).c_str());
+                    fw << "git clone " << Repo1[i] << " " << date << "\n";
+                }
+                fw << "exit";
+                fw.close();
+
+                fw.open(".\\Scripts\\" + outname + "\\" + outname);
+                fw << date << "\n";
+                fw.close();
+
+                std::cout << "\nThe opertation ended successfuly!\n\n";
+
+                Repo1.clear();
                 break;
             case 2:
+                DIR* dr;
+                dr = opendir(".\\Scripts");
+
+                if (dr != NULL)
+                {
+                    for (d = readdir(dr); d != NULL; d = readdir(dr)) { Dir.push_back(d->d_name); }
+                    closedir(dr);
+                }
+
+                for (int i = 0; i < Dir.size(); i++) {
+                    std::cout << i << ": " << Dir[i] << "\n";
+                }
+
+                std::cout << "\n";
+
+                std::cout << "Write a path index to delete: ";
+                std::cin >> pathtodel;
+                if (pathtodel < Dir.size() && pathtodel >= 0) {
+                    system(("rmdir .\\Scripts\\" + Dir[pathtodel]).c_str());
+                }
+
                 break;
         }
     } while (choice != 3);
