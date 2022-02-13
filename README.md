@@ -1,4 +1,4 @@
-# Git backups
+# Git backup
 
 #### Backup system for github repository
 
