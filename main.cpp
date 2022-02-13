@@ -156,7 +156,6 @@ int main() {
 
             /*
             Config file:
-
             date ~ [date]
             repo ~ [link]
             file ~ [dir]
@@ -198,18 +197,17 @@ int main() {
             // select a repository
             do {
                 std::cout << "Give the repository url: ";
-                std::cin >> repo1;
-                if (repo1.size() < 5)
-                    break;
-                else if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
+                getline(std::cin, repo1);
+                if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
                     Repo1.emplace_back(repo1);
+                else
+                    break;
             } while (1);
 
             std::cout << "\n";
 
             /*
             Config file:
-
             date ~ [date]
             repo ~ [link]
             file ~ [dir]
