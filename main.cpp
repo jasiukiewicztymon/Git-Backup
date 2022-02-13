@@ -61,18 +61,14 @@
     gitPath: C:/Users/Jasiu/.git/
 */
 
-std::string user_name()
-{
-    char buffer[UNLEN + 1]{};
-    DWORD len = UNLEN + 1;
-    if (::GetUserNameA(buffer, &len)) return buffer;
-    else return {}; // or: return "" ;
-}
-
 int main() {
     system("");
     struct stat buffer;
-    std::string name = user_name();
+    char buffer3[UNLEN + 1];
+    DWORD len = UNLEN + 1;
+    std::string name;
+    if (::GetUserNameA(buffer3, &len))
+        name = buffer3;
     const std::string gitPath = "C:/Users/" + name + "/GitBackup/";
     if (stat(".\\Scripts\\", &buffer) != 0) {
         system("mkdir .\\Scripts\\");
@@ -191,7 +187,7 @@ int main() {
             fw.close();
 
             fw.open(".\\Scripts\\" + outname + "\\" + outname);
-            fw << date << "\n" << repo0 << "\n";
+            fw << date << "\n";
             fw.close();
 
             std::cout << "\nThe opertation ended successfuly!\n\n";
@@ -202,11 +198,11 @@ int main() {
             // select a repository
             do {
                 std::cout << "Give the repository url: ";
-                std::getline(std::cin, repo1);
-                if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
-                    Repo1.emplace_back(repo1);
-                else
+                std::cin >> repo1;
+                if (repo1.size() < 5)
                     break;
+                else if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
+                    Repo1.emplace_back(repo1);
             } while (1);
 
             std::cout << "\n";
@@ -229,9 +225,9 @@ int main() {
 
             fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
             fw << "@echo off\n";
+            fw << "cd " << n << "\n";
             for (int i = 0; i < Repo1.size(); i++) {
-                system(("mkdir " + n + date).c_str());
-                fw << "git clone " << Repo1[i] << " " << date << "\n";
+                fw << "git clone " << Repo1[i] << " .\\Scripts\\" << outname << "\\" << date << "\\\n";
             }
             fw << "exit";
             fw.close();
