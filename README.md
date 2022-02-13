@@ -1,6 +1,6 @@
 # Git backups
 
-*Backup system for github repository"
+*Backup system for github repository*
 
 ## Before start
 
