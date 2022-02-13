@@ -135,139 +135,138 @@ int main() {
 
         // switch option to scripts
         switch (choice) {
-            case 0:
-                // select folder to upload
-                while (1) {
-                    std::cout << "Give a path to backup: ";
-                    std::getline(std::cin, path0);
-                    if (path0.size() < 5)
-                        break;
-                    else
-                        Path0.emplace_back(path0);
-                } 
-                
-                std::cout << "\n";
-       
-                // select a repository
-                do {
-                    std::cout << "Give the repository url: ";
-                    std::cin >> repo0;
-                    if (repo0.rfind("https://", 0) == 0 || repo0.rfind("http://", 0) == 0 || repo0.rfind("git@", 0) == 0)
-                        break;
-                } while (1);
+        case 0:
+            // select folder to upload
+            while (1) {
+                std::cout << "Give a path to backup: ";
+                std::getline(std::cin, path0);
+                if (path0.size() < 5)
+                    break;
+                else
+                    Path0.emplace_back(path0);
+            }
 
-                std::cout << "\n";
+            std::cout << "\n";
 
-                /*
-                Config file:
+            // select a repository
+            do {
+                std::cout << "Give the repository url: ";
+                std::cin >> repo0;
+                if (repo0.rfind("https://", 0) == 0 || repo0.rfind("http://", 0) == 0 || repo0.rfind("git@", 0) == 0)
+                    break;
+            } while (1);
 
-                date ~ [date]
-                repo ~ [link]
-                file ~ [dir]
-                */
+            std::cout << "\n";
 
-                std::cout << "\nName the bat file: ";
-                std::cin >> outname;
-                n = ".\\Scripts\\" + outname + "\\";
+            /*
+            Config file:
 
-                if (stat(n.c_str(), &buffer) != 0) {
-                    system(("mkdir " + n).c_str());
-                }
+            date ~ [date]
+            repo ~ [link]
+            file ~ [dir]
+            */
 
-                for (int i = 0; i < Path0.size(); i++)
-                    system(("copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
+            std::cout << "\nName the bat file: ";
+            std::cin >> outname;
+            n = ".\\Scripts\\" + outname + "\\";
 
-                fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
-                fw << "@echo off\n";
-                for (int i = 0; i < Path0.size(); i++)
-                    fw << "copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\\n";
-                fw << "git.exe init\n";
-                fw << "git.exe add --all\n";
-                fw << "git.exe commit -m " + date + "\n";
-                fw << "git.exe branch -M " + date + "\n";
-                fw << "git.exe remote set-url origin " + repo0 + "\n";
-                fw << "git.exe push --all --repo=" + repo0 + "\n";
-                fw << "exit";
-                fw.close();
+            if (stat(n.c_str(), &buffer) != 0) {
+                system(("mkdir " + n).c_str());
+            }
 
-                fw.open(".\\Scripts\\" + outname + "\\" + outname);
-                fw << date << "\n" << repo0 << "\n";
-                fw.close();
+            for (int i = 0; i < Path0.size(); i++)
+                system(("copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
 
-                std::cout << "\nThe opertation ended successfuly!\n\n";
+            fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
+            fw << "@echo off\n";
+            for (int i = 0; i < Path0.size(); i++)
+                fw << "copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\\n";
+            fw << "git.exe init\n";
+            fw << "git.exe add --all\n";
+            fw << "git.exe commit -m " + date + "\n";
+            fw << "git.exe branch -M " + date + "\n";
+            fw << "git.exe remote set-url origin " + repo0 + "\n";
+            fw << "git.exe push --all --repo=" + repo0 + "\n";
+            fw << "exit";
+            fw.close();
 
-                Path0.clear();
-                break;
-            case 1:
-                // select a repository
-                do {
-                    std::cout << "Give the repository url: ";
-                    std::cin >> repo1;
-                    if (repo1.size() < 5)
-                        break;
-                    else if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
-                        Repo1.emplace_back(repo1);
-                } while (1);
+            fw.open(".\\Scripts\\" + outname + "\\" + outname);
+            fw << date << "\n" << repo0 << "\n";
+            fw.close();
 
-                std::cout << "\n";
+            std::cout << "\nThe opertation ended successfuly!\n\n";
 
-                /*
-                Config file:
+            Path0.clear();
+            break;
+        case 1:
+            // select a repository
+            do {
+                std::cout << "Give the repository url: ";
+                std::getline(std::cin, repo1);
+                if (repo1.rfind("https://", 0) == 0 || repo1.rfind("http://", 0) == 0 || repo1.rfind("git@", 0) == 0)
+                    Repo1.emplace_back(repo1);
+                else
+                    break;
+            } while (1);
 
-                date ~ [date]
-                repo ~ [link]
-                file ~ [dir]
-                */
+            std::cout << "\n";
 
-                std::cout << "\nName the bat file: ";
-                std::cin >> outname;
-                n = ".\\Scripts\\" + outname + "\\";
+            /*
+            Config file:
 
-                if (stat(n.c_str(), &buffer) != 0) {
-                    system(("mkdir " + n).c_str());
-                }
+            date ~ [date]
+            repo ~ [link]
+            file ~ [dir]
+            */
 
-                fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
-                fw << "@echo off\n";
-                fw << "cd " << n << "\n";
-                for (int i = 0; i < Repo1.size(); i++) {
-                    system(("mkdir " + date).c_str());
-                    fw << "git clone " << Repo1[i] << " " << date << "\n";
-                }
-                fw << "exit";
-                fw.close();
+            std::cout << "\nName the bat file: ";
+            std::cin >> outname;
+            n = ".\\Scripts\\" + outname + "\\";
 
-                fw.open(".\\Scripts\\" + outname + "\\" + outname);
-                fw << date << "\n";
-                fw.close();
+            if (stat(n.c_str(), &buffer) != 0) {
+                system(("mkdir " + n).c_str());
+            }
 
-                std::cout << "\nThe opertation ended successfuly!\n\n";
+            fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
+            fw << "@echo off\n";
+            for (int i = 0; i < Repo1.size(); i++) {
+                system(("mkdir " + n + date).c_str());
+                fw << "git clone " << Repo1[i] << " " << date << "\n";
+            }
+            fw << "exit";
+            fw.close();
 
-                Repo1.clear();
-                break;
-            case 2:
-                DIR* dr;
-                dr = opendir(".\\Scripts");
+            fw.open(".\\Scripts\\" + outname + "\\" + outname);
+            fw << date << "\n";
+            fw.close();
 
-                if (dr != NULL)
-                {
-                    for (d = readdir(dr); d != NULL; d = readdir(dr)) { Dir.push_back(d->d_name); }
-                    closedir(dr);
-                }
+            std::cout << "\nThe opertation ended successfuly!\n\n";
 
-                for (int i = 0; i < Dir.size(); i++) {
-                    std::cout << i << ": " << Dir[i] << "\n";
-                }
+            Repo1.clear();
+            break;
+        case 2:
+            DIR * dr;
+            dr = opendir(".\\Scripts");
 
-                std::cout << "\n";
+            if (dr != NULL)
+            {
+                for (d = readdir(dr); d != NULL; d = readdir(dr)) { Dir.push_back(d->d_name); }
+                closedir(dr);
+            }
 
-                std::cout << "Write a path index to delete: ";
-                std::cin >> pathtodel;
-                if (pathtodel < Dir.size() && pathtodel >= 0) {
-                    system(("rmdir .\\Scripts\\" + Dir[pathtodel]).c_str());
-                }
+            for (int i = 0; i < Dir.size(); i++) {
+                std::cout << i << ": " << Dir[i] << "\n";
+            }
 
-                break;
+            std::cout << "\n";
+
+            std::cout << "Write a path index to delete: ";
+            std::cin >> pathtodel;
+            if (pathtodel < Dir.size() && pathtodel >= 0) {
+                system(("rmdir .\\Scripts\\" + Dir[pathtodel]).c_str());
+            }
+
+            break;
         }
     } while (choice != 3);
 }
