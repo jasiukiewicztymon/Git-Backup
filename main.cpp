@@ -170,14 +170,16 @@ int main() {
             }
 
             for (int i = 0; i < Path0.size(); i++)
-                system(("copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
+                system(("xcopy /S /E /-Y /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
 
             fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
             fw << "@echo off\n";
             for (int i = 0; i < Path0.size(); i++)
-                fw << "copy /Z /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\\n";
+                fw << "xcopy /S /E /-Y /Y \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\\n";
             fw << "git.exe init\n";
             fw << "git.exe add --all\n";
+            fw << "git.exe add .\n";
+            fw << "git.exe add *\n";
             fw << "git.exe commit -m " + date + "\n";
             fw << "git.exe branch -M " + date + "\n";
             fw << "git.exe remote set-url origin " + repo0 + "\n";
