@@ -104,15 +104,20 @@ int main() {
     std::string path0, repo0, filename0 = "";
     std::vector<std::string> Path0;
 
-    auto start = std::chrono::system_clock::now();
-    auto end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-    std::string timer = std::ctime(&end_time);
-    std::string timestr = timer.substr(0, 3) + timer.substr(4, 3) + timer.substr(timer.size() - 5, 4);
-
     do {
+        // version name
+        std::time_t rawtime;
+        std::tm* timeinfo;
+        char buffer2[80];
+
+        std::time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+
+        std::strftime(buffer2, 80, "%Y-%m-%d", timeinfo);
+        std::puts(buffer2);
+
+        std::string date = buffer2;
+
         // get option
         std::cout << "[0] - Upload from local a backup\n[1] - Download to local a backup\n[2] - Manage backups\n[3] - Exit\n\n";
         do {
@@ -171,20 +176,18 @@ int main() {
                 fw << "@echo off\n";
                 fw << "git.exe init\n";
                 fw << "git.exe add --all\n";
-                fw << "git.exe commit -m " + timestr + "\n";
-                fw << "git.exe branch -M " + timestr + "\n";
+                fw << "git.exe commit -m " + date + "\n";
+                fw << "git.exe branch -M " + date + "\n";
                 fw << "git.exe remote set-url origin " + repo0 + "\n";
                 fw << "git.exe push --all --repo=" + repo0 + "\n";
                 fw << "exit";
                 fw.close();
 
                 fw.open(".\\Scripts\\" + outname + "\\" + outname);
-                fw << timestr << "\n" << repo0 << "\n";
+                fw << date << "\n" << repo0 << "\n";
                 fw.close();
 
                 std::cout << "\nThe opertation ended successfuly!\n\n";
-
-                system(("start .\\Scripts\\" + outname + "\\" + outname + ".bat").c_str());
 
                 Path0.clear();
                 break;
