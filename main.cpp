@@ -70,6 +70,7 @@ std::string user_name()
 }
 
 int main() {
+    system("");
     struct stat buffer;
     std::string name = user_name();
     const std::string gitPath = "C:/Users/" + name + "/GitBackup/";
@@ -141,7 +142,7 @@ int main() {
                 do {
                     std::cout << "Give the repository url: ";
                     std::cin >> repo0;
-                    if (repo0.rfind("https://", 0) == 0 || repo0.rfind("http://", 0) == 0)
+                    if (repo0.rfind("https://", 0) == 0 || repo0.rfind("http://", 0) == 0 || repo0.rfind("git@", 0) == 0)
                         break;
                 } while (1);
 
@@ -168,15 +169,13 @@ int main() {
 
                 fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
                 fw << "@echo off\n";
-                fw << "git init\n";
-                fw << "git add .\n";
-                fw << "git add *\n";
-                fw << "git commit -m \"" + timestr + "\"\n";
-                fw << "git branch \"" + timestr + "\"\n";
-                fw << "git checkout \"" + timestr + "\"\n";
-                fw << "git remote add origin " + repo0 + "\n";
-                fw << "git push -u origin \"" + timestr + "\"\n";
-                fw << "git push --set-upstream origin \"" + timestr + "\"\n";
+                fw << "git.exe init\n";
+                fw << "git.exe add --all\n";
+                fw << "git.exe commit -m " + timestr + "\n";
+                fw << "git.exe branch -M " + timestr + "\n";
+                fw << "git.exe remote set-url origin " + repo0 + "\n";
+                fw << "git.exe push --all --repo=" + repo0 + "\n";
+                fw << "exit";
                 fw.close();
 
                 fw.open(".\\Scripts\\" + outname + "\\" + outname);
@@ -185,11 +184,7 @@ int main() {
 
                 std::cout << "\nThe opertation ended successfuly!\n\n";
 
-                fw.open("run.bat");
-                fw << ("start .\\Scripts\\" + outname + "\\" + outname + ".bat") << "\n";
-                fw.close();
-
-                system("start run.bat");
+                system(("start .\\Scripts\\" + outname + "\\" + outname + ".bat").c_str());
 
                 Path0.clear();
                 break;
