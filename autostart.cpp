@@ -58,7 +58,7 @@
 #include "dirent.h"
 
 int main() {
-    //ShowWindow(GetConsoleWindow(), SW_HIDE);
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
 
     while (1) {
         std::time_t rawtime;
@@ -70,7 +70,7 @@ int main() {
 
         std::strftime(buffer2, 80, "%Y-%m-%d", timeinfo);
 
-        std::string date = buffer2, wdate;
+        std::string date = buffer2, wdate, line, content, newcontent;
 
         std::vector<std::string> Dir;
         struct dirent* d;
@@ -95,9 +95,29 @@ int main() {
                     f.open(".\\Scripts\\" + Dir[i] + "\\" + Dir[i]);
                     f << date;
                     f.close();
+                    f.open(".\\Scripts\\" + Dir[i] + "\\" + Dir[i] + ".bat");
+                    while (getline(f, line)) {
+                        content += line + "\n";
+                    }
+
+                    int start = 0;
+                    int end = content.find(wdate);
+                    while (end != -1) {
+                        newcontent += content.substr(start, end - start) + date;
+                        start = end + wdate.size();
+                        end = content.find(wdate, start);
+                    }
+                    newcontent += content.substr(start, end - start);
+                    f.close();
+                    f.open(".\\Scripts\\" + Dir[i] + "\\" + Dir[i] + ".bat");
+                    f << newcontent;
+                    f.close();
+                    newcontent = "";
+
                     system(("start .\\Scripts\\" + Dir[i] + "\\" + Dir[i] + ".bat").c_str());
                 }
             }
         }
+        Sleep(10000);
     }
 }
