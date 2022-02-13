@@ -2,7 +2,7 @@
 
 *Backup system for github repository*
 
-## Before start
+# Before start
 
 ### Git
 Be sure you have installed Git on your PC, if it's not done here you have the link to download it: [Git](https://git-scm.com/downloads)
@@ -12,7 +12,7 @@ Add the autorun.exe to the autorun of your PC, to don't have to run it manually 
 
 And enable the SSH connection on your github and your PC
 
-## From git to local
+# From git to local
 
 1. Run the main .exe / .cpp
 2. Choose the option **1**
