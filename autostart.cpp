@@ -1,66 +1,103 @@
-#include "dirent.h"
-#include <vector>
 #include <string>
+#include <fstream>
+#include <vector>
+#include <chrono>
+#include <time.h>   
+#include <windows.h>
+#include <Lmcons.h>
+#include <iostream>
+#include <Windows.h>
+
+#ifndef _UNISTD_H
+#define _UNISTD_H    1
+
+#include <stdlib.h>
+#include <io.h>
+#include <process.h> 
+#include <direct.h> 
+
+#define srandom srand
+#define random rand
+
+#define R_OK    4       
+#define W_OK    2       
+#define F_OK    0   
+
+#define access _access
+#define dup2 _dup2
+#define execve _execve
+#define ftruncate _chsize
+#define unlink _unlink
+#define fileno _fileno
+#define getcwd _getcwd
+#define chdir _chdir
+#define isatty _isatty
+#define lseek _lseek
+
+#ifdef _WIN64
+#define ssize_t __int64
+#else
+#define ssize_t long
+#endif
+
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
+#endif
+
 #include <chrono>
 #include <ctime>  
-#include <fstream>
-#include <sstream>
+
+#include <tchar.h> 
+#include <stdio.h>
+#include <strsafe.h>
+#pragma comment(lib, "User32.lib")
+#pragma comment( lib, "advapi32" )  
+
+#include "dirent.h"
 
 int main() {
-    std::vector<std::string> Dir;
-    struct dirent* d;
-    DIR* dr;
-    dr = opendir(".\\Scripts\\");
+    //ShowWindow(GetConsoleWindow(), SW_HIDE);
 
-    if (dr != NULL)
-    {
-        for (d = readdir(dr); d != NULL; d = readdir(dr)) { Dir.push_back(d->d_name); }
-        closedir(dr);
-    }
+    while (1) {
+        std::time_t rawtime;
+        std::tm* timeinfo;
+        char buffer2[80];
 
-    auto start = std::chrono::system_clock::now();
-    auto end = std::chrono::system_clock::now();
+        std::time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
 
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-    std::string timer = std::ctime(&end_time);
-    std::string timestr = timer.substr(0, 2) + timer.substr(4, 6) + timer.substr(timer.size() - 4, timer.size());
+        std::strftime(buffer2, 80, "%Y-%m-%d", timeinfo);
 
-    std::string confStr, batContent, line;
-    std::vector<std::string> Vconf, Vbat;
+        std::string date = buffer2, wdate;
 
-    for (int i = 0; i < Dir.size(); i++) {
-        if (Dir[i].find('.') != std::string::npos) {
-            std::ifstream conf(Dir[i]);
-            conf >> confStr;
-            conf.close();
+        std::vector<std::string> Dir;
+        struct dirent* d;
+        DIR* dr;
+        dr = opendir(".\\Scripts\\");
 
-            std::stringstream sc(confStr);
-            while (sc >> line) {
-                Vconf.emplace_back(line);
-            }
+        if (dr != NULL)
+        {
+            for (d = readdir(dr); d != NULL; d = readdir(dr)) { Dir.push_back(d->d_name); }
+            closedir(dr);
+        }
 
-            if (timestr != Vconf[0] && Vconf.size() >= 3 && (Vconf[1].rfind("https://", 0) == 0 || Vconf[1].rfind("http://", 0) == 0)) {
-                std::string  content = "@echo off\n";
-                for (int i = 2; i < Vconf.size() - 1; i++) {
-                    content += "cd " + Vconf[i] + "\n";
-                    content += "git init\ngit add .\ngit commit -m \"" + timestr + "\"\n";
-                    if (i == 0)
-                        content += "git branch \"" + timestr + "\"\n";
-                    content += "git checkout \"" + timestr + "\"\n";
-                    content += "git remote add origin " + Vconf[1] + "\n";
-                    content += "git push -u origin \"" + timestr + "\"\n";
+        std::fstream file, f;
+
+        for (int i = 0; i < Dir.size(); i++) {
+            if (Dir[i] != "." && Dir[i] != ".." && Dir[i] != ".git") {
+                file.open(".\\Scripts\\" + Dir[i] + "\\" + Dir[i]);
+
+                file >> wdate;
+                file.close();
+                if (wdate != date) {
+                    f.open(".\\Scripts\\" + Dir[i] + "\\" + Dir[i]);
+                    f << date;
+                    f.close();
+                    system(("start .\\Scripts\\" + Dir[i] + "\\" + Dir[i] + ".bat").c_str());
                 }
-
-                std::ofstream fw(".\\Scripts\\" + Dir[i] + ".bat");
-                fw << content;
-                fw.close();
             }
-            else {
-
-            }
-
-            system(("start .\\Scripts\\" + Dir[i] + ".bat").c_str());
         }
     }
 }
