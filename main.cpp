@@ -46,11 +46,9 @@
 
 #endif
 
-#include <lmcons.h>
 #include <chrono>
 #include <ctime>  
 
-#include <windows.h>
 #include <tchar.h> 
 #include <stdio.h>
 #include <strsafe.h>
@@ -79,6 +77,7 @@ int main() {
         system("mkdir .\\Scripts\\");
     }
 
+    std::string n;
     std::vector<std::string> Dir;
 
     std::cout << "   ____    __              _______________  __            __           \n"
@@ -100,8 +99,8 @@ int main() {
     std::string content, outname;
     std::ofstream fw;
 
-    char backer0;
-    std::string path0 = "\"C:\\\"", repo0, filename0 = "";
+    char backer0 = 0;
+    std::string path0, repo0, filename0 = "";
     std::vector<std::string> Path0;
 
     auto start = std::chrono::system_clock::now();
@@ -110,7 +109,7 @@ int main() {
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     std::string timer = std::ctime(&end_time);
-    std::string timestr = timer.substr(0, 2) + timer.substr(4, 6) + timer.substr(timer.size() - 4, timer.size());
+    std::string timestr = timer.substr(0, 3) + timer.substr(4, 3) + timer.substr(timer.size() - 5, 4);
 
     do {
         // get option
@@ -127,12 +126,13 @@ int main() {
         switch (choice) {
             case 0:
                 // select folder to upload
-                while (path0.size() > 4) {
+                while (1) {
                     std::cout << "Give a path to backup: ";
                     std::getline(std::cin, path0);
-                    path0 = "\"" + path0 + "\"";
-
-                    Path0.emplace_back(path0);
+                    if (path0.size() < 5)
+                        break;
+                    else
+                        Path0.emplace_back(path0);
                 } 
                 
                 std::cout << "\n";
@@ -153,34 +153,45 @@ int main() {
                 date ~ [date]
                 repo ~ [link]
                 file ~ [dir]
-                file ~ [dir]
-                ...
-
                 */
 
-                system("@echo off");
-                for (int i = 0; i < Path0.size() - 1; i++) {
-                    system(("cd " + Path0[i]).c_str());
-                    system("git init");
-                    system("git add .");
-                    system(("git commit -m \"" + timestr + "\"").c_str());
-                    if (i == 0)
-                        system(("git branch \"" + timestr + "\"").c_str());
-                    system(("git checkout \"" + timestr + "\"").c_str());
-                    system(("git remote add origin " + repo0).c_str());
-                    system(("git push -u origin \"" + timestr + "\"").c_str());
+                std::cout << "\nName the bat file: ";
+                std::cin >> outname;
+                n = ".\\Scripts\\" + outname + "\\";
+
+                if (stat(n.c_str(), &buffer) != 0) {
+                    system(("mkdir " + n).c_str());
                 }
 
-                std::cout << "\nName the bat file: ";
-                std::getline(std::cin, outname);
-                fw.open(".\\Scripts\\" + outname);
+                for (int i = 0; i < Path0.size(); i++)
+                    system(("copy /Z \"" + Path0[i] + "\" .\\Scripts\\" + outname + "\\").c_str());
+
+                fw.open(".\\Scripts\\" + outname + "\\" + outname + ".bat");
+                fw << "@echo off\n";
+                fw << "git init\n";
+                fw << "git add .\n";
+                fw << "git add *\n";
+                fw << "git commit -m \"" + timestr + "\"\n";
+                fw << "git branch \"" + timestr + "\"\n";
+                fw << "git checkout \"" + timestr + "\"\n";
+                fw << "git remote add origin " + repo0 + "\n";
+                fw << "git push -u origin \"" + timestr + "\"\n";
+                fw << "git push --set-upstream origin \"" + timestr + "\"\n";
+                fw.close();
+
+                fw.open(".\\Scripts\\" + outname + "\\" + outname);
                 fw << timestr << "\n" << repo0 << "\n";
-                for (int i = 0; i < Path0.size() - 1; i++)
-                    fw << Path0[i] << "\n";
                 fw.close();
 
                 std::cout << "\nThe opertation ended successfuly!\n\n";
 
+                fw.open("run.bat");
+                fw << ("start .\\Scripts\\" + outname + "\\" + outname + ".bat") << "\n";
+                fw.close();
+
+                system("start run.bat");
+
+                Path0.clear();
                 break;
             case 1:
                 break;
