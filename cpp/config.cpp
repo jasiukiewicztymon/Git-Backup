@@ -120,7 +120,7 @@ int main() {
         std::string date = buffer2;
 
         // get option
-        std::cout << "[0] - Upload from local a backup\n[1] - Download to local a backup\n[2] - Delete backups\n[3] - Exit\n\n";
+        std::cout << "[0] - Generate backup script from local to Git\n[1] - Generate backup script from Git to local\n[2] - Delete backups\n[3] - Exit\n\n";
         do {
             std::cout << "> ";
             std::cin >> choice;
